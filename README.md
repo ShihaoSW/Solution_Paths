@@ -1,4 +1,4 @@
-# Solution_Paths
+# Solution Paths
 
 Compute and compare the solution paths in R. 
 
