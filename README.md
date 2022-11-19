@@ -1,6 +1,6 @@
 # Solution Paths
 
-Compute and compare the solution paths in R. 
+Some sample codes to compute and compare the solution paths in R. 
 
 **Competitors**: LASSO, SCAD, MCP and L0 methods (best subset selection, one/two stage IHT).
 
@@ -10,3 +10,5 @@ Compute and compare the solution paths in R.
 - 'path_LBSS.R': generates the solution paths of LBSS (LASSO + best subset selection) based on Monte Carlo repetitions
 - 'path_iht.R': generates the solution paths of one-stage IHT based on Monte Carlo repetitions
 
+**Reference**:
+[https://arxiv.org/abs/2107.06939](https://arxiv.org/abs/2107.06939)
