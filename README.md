@@ -15,8 +15,5 @@ Some sample codes to compute and compare the solution paths in R.
 //<img src="11c.png" alt="drawing" width="500"/>
 </p>
 
-
-
-
 **Reference**:
 [On sure early selection of the best subset](https://arxiv.org/abs/2107.06939)
