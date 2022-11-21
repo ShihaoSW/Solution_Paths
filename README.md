@@ -1,6 +1,6 @@
 # Solution Paths
 
-Some sample codes to compute and compare the solution paths in R. 
+Some sample codes to compute and compare the solution paths using R. 
 
 **Competitors**: LASSO, SCAD, MCP and L0 methods (best subset selection, one/two stage IHT, L0L2).
 
