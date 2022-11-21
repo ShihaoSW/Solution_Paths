@@ -13,7 +13,7 @@ Some sample codes to compute and compare the solution paths in R.
 **A sample path plot**:
 
 <div style="text-align: center;">
-<img src="11c.png" alt="drawing" width="600"/>
+<img src="11c.png" alt="drawing" width="500"/>
 </div>
 
 
