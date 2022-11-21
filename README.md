@@ -11,7 +11,7 @@ Some sample codes to compute and compare the solution paths in R.
 - 'path_iht.R': generates the solution paths of one-stage IHT based on Monte Carlo repetitions
 
 **A sample path plot**:
-![sample](11c)
+![sample](11c.png)
 
 
 **Reference**:
