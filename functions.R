@@ -1047,6 +1047,11 @@ ms_select <- function(X, Y, supp_true, scale_X = TRUE){
     return(ms_result)
 }
 
+fd_select <- function(X, Y, supp_true, max_size){
+  
+}
+
+
 scad_cv <- function(X, Y, lambda_list, nfold = 10){
     ## cross validation for SCAD (picasso) using a fixed list of lambdas
     ## Input: X, Y: data
