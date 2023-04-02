@@ -574,6 +574,146 @@ cosbss <- function(X, Y, scale_X = TRUE, supp_true, s_list = c(), proj_size,
   return(cosbss_result)
 }
 
+L0Learn_grid <- function(X, Y, supp_true, method = 'L0L2', max_size){
+  ## variable selection (with multiple solutions in grid) via package 'L0Learn'
+  # prepare
+ 
+  n = dim(X)[1]
+  p = dim(X)[2]
+  s = length(supp_true)
+  
+  fit <- L0Learn.fit(X, Y, penalty = method, maxSuppSize = max_size)    
+
+  lambda_ns = lengths(fit$lambda)
+  gamma_size = length(lengths(fit$lambda))
+  sol_num = sum(lengths(fit$lambda))
+  
+  beta_table = matrix(0, nrow = p, ncol = sol_num)
+  
+  col_index = 0
+  
+  for (i in 1:gamma_size) {
+    gamma = fit$gamma[i]
+    for (j in 1:lambda_ns[i]) {
+      col_index = col_index + 1
+      lambda = unlist(fit$lambda[i])[j]
+      beta_table[,col_index] = coef(fit, lambda = lambda, gamma = gamma)[2:(p+1)]
+    }
+  }
+  
+  # FDR and TPR
+  beta_supp = apply(beta_table, 2, function(c) sum(c != 0))
+  TP = apply(beta_table, 2, function(c) length(intersect(which(c != 0), supp_true)))
+  FP = beta_supp - TP
+  TPR = TP / s
+  # deal with cases with zero supp
+  beta_supp1 = beta_supp
+  beta_supp1[which(beta_supp1 == 0)] = 1
+  FDR = FP / beta_supp1
+  
+  cosbss_result = list(TPR = TPR, FDR = FDR)
+  return(cosbss_result)
+}
+
+
+
+L0Learn_path <- function(X, Y, supp_true, method = 'L0L2', max_size, lambda_ratio = 1.1, nlambda = 100){
+  ## variable selection (with multiple solutions on a path) via package 'L0Learn'
+  # prepare
+  
+  n = dim(X)[1]
+  p = dim(X)[2]
+  s = length(supp_true)
+  
+  first_fit <- L0Learn.fit(X, Y, penalty = method)
+  lambda_max = max(unlist(first_fit$lambda)) * 3
+  ratios = lambda_ratio ^ seq(0, nlambda-1)
+  lambda_list = list(lambda_max / ratios)
+  gamma_input = min(first_fit$gamma)
+  
+  fit <- L0Learn.fit(X, Y, penalty = method, maxSuppSize = max_size, nGamma = 1, gammaMax = gamma_input, 
+                     gammaMin = gamma_input, lambdaGrid = lambda_list)   
+  
+  
+  lambda_ns = lengths(fit$lambda)
+  gamma_size = length(lengths(fit$lambda))
+  sol_num = sum(lengths(fit$lambda))
+  
+  beta_table = matrix(0, nrow = p, ncol = sol_num)
+  
+  col_index = 0
+  
+  for (i in 1:gamma_size) {
+    gamma = fit$gamma[i]
+    for (j in 1:lambda_ns[i]) {
+      col_index = col_index + 1
+      lambda = unlist(fit$lambda[i])[j]
+      beta_table[,col_index] = coef(fit, lambda = lambda, gamma = gamma)[2:(p+1)]
+    }
+  }
+  
+  # FDR and TPR
+  beta_supp = apply(beta_table, 2, function(c) sum(c != 0))
+  TP = apply(beta_table, 2, function(c) length(intersect(which(c != 0), supp_true)))
+  FP = beta_supp - TP
+  TPR = TP / s
+  # deal with cases with zero supp
+  beta_supp1 = beta_supp
+  beta_supp1[which(beta_supp1 == 0)] = 1
+  FDR = FP / beta_supp1
+  
+  cosbss_result = list(TPR = TPR, FDR = FDR)
+  return(cosbss_result)
+}
+
+
+L0Learn_path2 <- function(X, Y, supp_true, method = 'L0L2', max_size, lambda_list, gamma_input){
+  ## variable selection (with multiple solutions on a path) via package 'L0Learn'
+  ## lambda and gamma are predetermined
+  # prepare
+  
+  n = dim(X)[1]
+  p = dim(X)[2]
+  s = length(supp_true)
+  
+  
+  fit <- L0Learn.fit(X, Y, penalty = method, maxSuppSize = max_size, nGamma = 1, gammaMax = gamma_input, 
+                     gammaMin = gamma_input, lambdaGrid = lambda_list, maxIters = 2000, rtol = 1e-09)   
+  
+  
+  lambda_ns = lengths(fit$lambda)
+  gamma_size = length(lengths(fit$lambda))
+  sol_num = sum(lengths(fit$lambda))
+  
+  beta_table = matrix(0, nrow = p, ncol = sol_num)
+  
+  col_index = 0
+  
+  for (i in 1:gamma_size) {
+    gamma = fit$gamma[i]
+    for (j in 1:lambda_ns[i]) {
+      col_index = col_index + 1
+      lambda = unlist(fit$lambda[i])[j]
+      beta_table[,col_index] = coef(fit, lambda = lambda, gamma = gamma)[2:(p+1)]
+    }
+  }
+  
+  # FDR and TPR
+  beta_supp = apply(beta_table, 2, function(c) sum(c != 0))
+  TP = apply(beta_table, 2, function(c) length(intersect(which(c != 0), supp_true)))
+  FP = beta_supp - TP
+  TPR = TP / s
+  # deal with cases with zero supp
+  beta_supp1 = beta_supp
+  beta_supp1[which(beta_supp1 == 0)] = 1
+  FDR = FP / beta_supp1
+  
+  cosbss_result = list(TPR = TPR, FDR = FDR)
+  return(cosbss_result)
+}
+
+
+
 lasso_screen <- function(X, Y, scr_dim, nlambda = 100, lambda_ratio = 1.1){
   model_lasso = picasso(X, Y, nlambda=nlambda, method="l1", intercept=FALSE)
   lambda_lasso = model_lasso$lambda
