@@ -8,9 +8,9 @@ source("functions.R")
 ###### set seed ########
 seed <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
 set.seed(seed)
+ 
 
-
-####### unchanged parameters
+####### unchanged parameters. 
 p = 5000
 s = 50
 n = ceiling(2 * s * log(p))
