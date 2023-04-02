@@ -737,7 +737,7 @@ lasso_screen <- function(X, Y, scr_dim, nlambda = 100, lambda_ratio = 1.1){
 }
 
 lassobss <- function(X, Y, supp_true, s_list, scr_dim, timelimit, maxiter, prec){
-  ## variable selection using CoSaMP plus best subset selection
+  ## variable selection using LASSO plus best subset selection
   ## Input: X, Y: data
   ##        supp_true: the true support (not used during training)
   ##        s_list: list of estimated sparsity for training
@@ -1047,8 +1047,68 @@ ms_select <- function(X, Y, supp_true, scale_X = TRUE){
     return(ms_result)
 }
 
-fd_select <- function(X, Y, supp_true, max_size){
+fd_update <- function(X, Y, supp_now){
+  ## update a new variable via forward selection
+  n = dim(X)[1]
+  p = dim(X)[2]
+  supp_set = setdiff(c(1:p), supp_now)
+  select_len = length(supp_set)
+  score_list = rep(0,select_len)
   
+  for (i in 1:select_len) {
+    supp = c(supp_now, supp_set[i])
+    X_sup = X[, supp]
+    score_list[i] = t(Y) %*% (diag(n) - X_sup %*% solve(t(X_sup) %*% X_sup)
+                              %*% t(X_sup)) %*% Y
+  }
+  
+  update = supp_set[which(score_list == min(score_list))]
+  new_supp = c(supp_now, update)
+  
+  beta_new = rep(0,p)
+  X_sup = X[,new_supp]
+  beta_new[new_supp] =  solve(t(X_sup) %*% X_sup) %*% t(X_sup) %*% Y
+  
+  return(list(supp = new_supp, beta = beta_new ))
+}
+
+
+fd_select <- function(X, Y, supp_true, max_size){
+  ## variable selection using forward regression
+  ## Input: X, Y: data
+  ##        supp_true: the true support (not used during training)
+  ##        max_size: maximum size of model
+  ## Output: fd_result: list of TPR, FDR
+  n = dim(X)[1]
+  p = dim(X)[2]
+  s = length(supp_true)
+  
+  
+  # create beta_table
+  beta_table = matrix(0, nrow = p, ncol = max_size)
+  
+  # fill in the beta_table
+  beta_table[,1] = fd_update(X,Y,c())$beta
+  for (i in 1:(max_size - 1)) {
+    beta_old = beta_table[,i]
+    supp_old = which(beta_old != 0)
+    update = fd_update(X,Y,supp_old)
+    beta_table[,i+1] = update$beta
+  }
+  
+  
+  # FDR and TPR
+  beta_supp = apply(beta_table, 2, function(c) sum(c != 0))
+  TP = apply(beta_table, 2, function(c) length(intersect(which(c != 0), supp_true)))
+  FP = beta_supp - TP
+  TPR = TP / s
+  # deal with cases with zero supp
+  beta_supp1 = beta_supp
+  beta_supp1[which(beta_supp1 == 0)] = 1
+  FDR = FP / beta_supp1
+  
+  fd_result = list(TPR = TPR, FDR = FDR)
+  return(fd_result)
 }
 
 
