@@ -16,4 +16,4 @@ Some sample codes to compute and compare the solution paths using R.
 </p>
 
 **Reference**:
-[On sure early selection of the best subset](https://arxiv.org/abs/2107.06939)
+[On sure early selection of the best subset](https://ieeexplore.ieee.org/document/10568444)
